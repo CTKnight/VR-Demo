@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">VR Demo</string>
+    <string name="menu_add_model">Add Model</string>
+    <string name="menu_edit_mode">Edit Mode</string>
+    <string name="menu_flying_mode">Flying Mode</string>
+</resources>

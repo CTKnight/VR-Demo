@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/add_model"
+        android:icon="@drawable/ic_add_white_24dp"
+        android:title="@string/menu_add_model"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/edit_mode"
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/menu_edit_mode"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/flying_mode"
+        android:icon="@drawable/ic_send_white_24dp"
+        android:title="@string/menu_flying_mode"
+        app:showAsAction="ifRoom" />
+</menu>
