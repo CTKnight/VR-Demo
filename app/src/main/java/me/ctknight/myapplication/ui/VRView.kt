@@ -36,6 +36,18 @@ class VRView : GvrView {
     setTransitionViewEnabled(true)
   }
 
+  override fun onPause() {
+    super.onPause()
+
+    mRenderer.onPause()
+  }
+
+  override fun onResume() {
+    super.onResume()
+
+    mRenderer.onResume()
+  }
+
   companion object {
     private val TAG = VRView::class.java.simpleName
   }
