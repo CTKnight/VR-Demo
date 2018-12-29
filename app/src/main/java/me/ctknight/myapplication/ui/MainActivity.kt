@@ -1,10 +1,8 @@
 package me.ctknight.myapplication.ui
 
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
 import com.google.vr.sdk.base.GvrActivity
 import de.javagl.obj.ObjReader
 import me.ctknight.myapplication.R
@@ -12,7 +10,6 @@ import java.io.IOException
 
 class MainActivity : GvrActivity() {
   private lateinit var mGLView: VRView
-  private val handler = Handler()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -61,21 +58,6 @@ class MainActivity : GvrActivity() {
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     menuInflater.inflate(R.menu.menu_main_activity, menu)
     return true
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    when (item.itemId) {
-      R.id.edit_mode -> {
-        mGLView.isInEdit = !mGLView.isInEdit
-      }
-      R.id.add_model -> {
-        mGLView.isEditLight = !mGLView.isEditLight
-      }
-      R.id.flying_mode -> {
-        mGLView.mRenderer.isFlying = !mGLView.mRenderer.isFlying
-      }
-    }
-    return super.onOptionsItemSelected(item)
   }
 
   companion object {

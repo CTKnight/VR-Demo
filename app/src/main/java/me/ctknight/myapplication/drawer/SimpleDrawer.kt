@@ -8,7 +8,8 @@ import me.ctknight.myapplication.Scene
 import me.ctknight.myapplication.utils.ShaderUtil
 import java.io.IOException
 
-class SimpleDrawer(// must be created in GL render thread
+// must be created in GL render thread
+class SimpleDrawer(
     private val context: Context
 ) : IDrawer() {
   private var mProgram: Int = 0
@@ -28,11 +29,6 @@ class SimpleDrawer(// must be created in GL render thread
   private val vertexStride = COORDS_PER_VERTEX * 4
 
   override fun prepareOnGLThread() {
-    //        int program = glCreateProgram();
-    //        glAttachShader(program, vertexShader);
-    //        glAttachShader(program, fragmentShader);
-    //
-    //        glLinkProgram(program);
     try {
 
 
