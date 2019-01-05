@@ -3,4 +3,6 @@
     <string name="menu_add_model">Add Model</string>
     <string name="menu_edit_mode">Edit Mode</string>
     <string name="menu_flying_mode">Flying Mode</string>
+    <string name="permission_camera_denied">Camera permission not granted</string>
+    <string name="permission_camera_never_askagain">Camera permission not granted</string>
 </resources>

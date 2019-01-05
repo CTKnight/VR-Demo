@@ -1,18 +1,23 @@
 package me.ctknight.myapplication.ui
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import com.google.vr.sdk.base.GvrActivity
 import de.javagl.obj.ObjReader
 import me.ctknight.myapplication.R
+import permissions.dispatcher.*
 import java.io.IOException
 
+@RuntimePermissions
 class MainActivity : GvrActivity() {
   private lateinit var mGLView: VRView
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    checkPermission()
     setContentView(R.layout.activity_main)
     mGLView = findViewById(R.id.surface_view)
     gvrView = mGLView
@@ -50,12 +55,32 @@ class MainActivity : GvrActivity() {
     }
   }
 
+  @NeedsPermission(Manifest.permission.CAMERA)
+  fun checkPermission() {
+
+  }
+
   override fun onWindowFocusChanged(hasFocus: Boolean) {
     if (hasFocus) {
       mGLView.onResume()
     } else {
       mGLView.onPause()
     }
+  }
+
+  @OnShowRationale(Manifest.permission.CAMERA)
+  fun showRationaleForCamera(request: PermissionRequest) {
+//    showRationaleDialog(R.string.permission_camera_rationale, request)
+  }
+
+  @OnPermissionDenied(Manifest.permission.CAMERA)
+  fun onCameraDenied() {
+    Toast.makeText(this, R.string.permission_camera_denied, Toast.LENGTH_SHORT).show()
+  }
+
+  @OnNeverAskAgain(Manifest.permission.CAMERA)
+  fun onCameraNeverAskAgain() {
+    Toast.makeText(this, R.string.permission_camera_never_askagain, Toast.LENGTH_SHORT).show()
   }
 
   companion object {

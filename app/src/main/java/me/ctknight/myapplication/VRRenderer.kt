@@ -149,13 +149,13 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
 
   private fun updateMatrixByAR(eye: Eye, frame: Frame) {
     try {
-      val camera = frame.camera
 
       Matrix.setLookAtM(mCameraMatrix, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f)
 //      System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
 //          mProjectionMatrix, 0, mProjectionMatrix.size)
-      camera?.getProjectionMatrix(mProjectionMatrix, 0, Z_NEAR, Z_FAR)
-      camera?.getViewMatrix(mViewMatrix, 0)
+      val camera = frame.camera
+      camera.getProjectionMatrix(mProjectionMatrix, 0, Z_NEAR, Z_FAR)
+      camera.getViewMatrix(mViewMatrix, 0)
     } catch (e: Throwable) {
       Log.e(TAG, "exception when uploadMatrix", e)
     }
@@ -166,6 +166,5 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
     System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
         mProjectionMatrix, 0, mProjectionMatrix.size)
     Matrix.multiplyMM(mViewMatrix, 0, eye.eyeView, 0, mCameraMatrix, 0)
-
   }
 }
