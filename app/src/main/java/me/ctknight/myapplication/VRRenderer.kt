@@ -3,6 +3,8 @@ package me.ctknight.myapplication
 import android.content.Context
 import android.opengl.GLES20
 import android.opengl.Matrix
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import android.widget.Toast
 import com.google.ar.core.Frame
@@ -24,6 +26,7 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
     private val TAG = VRRenderer::class.java.simpleName
     private val Z_NEAR = 0.01f
     private val Z_FAR = 100f
+    private val USE_AR = false
   }
 
   private val gvrAudioEngine: GvrAudioEngine = GvrAudioEngine(context, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY)
@@ -37,6 +40,9 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
   private val mCameraMatrix = FloatArray(16)
   private val mHeadView = FloatArray(16)
   private val mHeadRotation = FloatArray(4)
+
+  private lateinit var bgThread: HandlerThread
+  private lateinit var handler: Handler
 
   fun onPause() {
     gvrAudioEngine.pause()
@@ -87,6 +93,9 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
     drawer.prepareOnGLThread()
     backgroundRenderer = BackgroundRenderer()
     backgroundRenderer.createOnGlThread(context)
+
+    bgThread = HandlerThread("AR update")
+    handler = Handler(bgThread.looper)
   }
 
   override fun onSurfaceChanged(width: Int, height: Int) {
@@ -107,12 +116,18 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
 
   override fun onDrawEye(eye: Eye) {
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-    val frame = ARSession?.update()
 
-    frame ?: return
+    if (USE_AR) {
+      ARSession?.setCameraTextureName(backgroundRenderer.textureId)
+      val frame = ARSession?.update()
 
-    updateMatrix(eye, frame)
-    backgroundRenderer.draw(frame)
+      frame ?: return
+      updateMatrixByAR(eye, frame)
+//      backgroundRenderer.draw(frame)
+    } else {
+      updateMatrixByVR(eye)
+    }
+
     scene.updateOObjMotion()
     synchronized(scene) {
       drawer.preDraw()
@@ -129,21 +144,28 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
 
   override fun onRendererShutdown() {
     Log.i(TAG, "onRendererShutdown")
+    bgThread.quitSafely()
   }
 
-  private fun updateMatrix(eye: Eye, frame: Frame) {
+  private fun updateMatrixByAR(eye: Eye, frame: Frame) {
     try {
-      ARSession?.setCameraTextureName(backgroundRenderer.textureId)
       val camera = frame.camera
 
       Matrix.setLookAtM(mCameraMatrix, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f)
-//    System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
-//        mProjectionMatrix, 0, mProjectionMatrix.size)
-//    Matrix.multiplyMM(mViewMatrix, 0, eye.eyeView, 0, mCameraMatrix, 0)
+//      System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
+//          mProjectionMatrix, 0, mProjectionMatrix.size)
       camera?.getProjectionMatrix(mProjectionMatrix, 0, Z_NEAR, Z_FAR)
       camera?.getViewMatrix(mViewMatrix, 0)
     } catch (e: Throwable) {
       Log.e(TAG, "exception when uploadMatrix", e)
     }
+  }
+
+  private fun updateMatrixByVR(eye: Eye) {
+    Matrix.setLookAtM(mCameraMatrix, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f)
+    System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
+        mProjectionMatrix, 0, mProjectionMatrix.size)
+    Matrix.multiplyMM(mViewMatrix, 0, eye.eyeView, 0, mCameraMatrix, 0)
+
   }
 }

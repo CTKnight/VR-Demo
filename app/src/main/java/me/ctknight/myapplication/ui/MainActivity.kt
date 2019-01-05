@@ -2,7 +2,6 @@ package me.ctknight.myapplication.ui
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
 import com.google.vr.sdk.base.GvrActivity
 import de.javagl.obj.ObjReader
 import me.ctknight.myapplication.R
@@ -57,11 +56,6 @@ class MainActivity : GvrActivity() {
     } else {
       mGLView.onPause()
     }
-  }
-
-  override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    menuInflater.inflate(R.menu.menu_main_activity, menu)
-    return true
   }
 
   companion object {

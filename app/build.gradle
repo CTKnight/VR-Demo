@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "me.ctknight.myapplication"
-        minSdkVersion 21
-        targetSdkVersion 27
+        minSdkVersion 24
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -24,17 +24,17 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.10'
 
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.0.0-alpha1'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
+
+    implementation "org.permissionsdispatcher:permissionsdispatcher:4.3.0"
+    kapt "org.permissionsdispatcher:permissionsdispatcher-processor:4.3.0"
+
     implementation 'com.google.ar:core:1.6.0'
 
     // Adds Google VR spatial audio support
     implementation 'com.google.vr:sdk-audio:1.180.0'
     // Required for all Google VR apps
     implementation 'com.google.vr:sdk-base:1.180.0'
-//    implementation(name:'AndroidObjRender-debug', ext:'aar')
     implementation 'de.javagl:obj:0.3.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }

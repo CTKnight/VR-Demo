@@ -53,12 +53,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="com.google.intent.category.CARDBOARD" />
-
-                <!-- The DAYDREAM category should only be declared by Activities that are Daydream
-                     compatible. Daydream compatible apps should typically use the Daydream
-                     controller APIs directly, however in this sample app we instead rely on
-                     Cardboard trigger emulation. -->
-                <category android:name="com.google.intent.category.DAYDREAM" />
             </intent-filter>
         </activity>
     </application>
