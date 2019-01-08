@@ -3,13 +3,9 @@ package me.ctknight.myapplication
 import android.content.Context
 import android.opengl.GLES20
 import android.opengl.Matrix
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.Log
-import android.widget.Toast
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
-import com.google.ar.core.exceptions.*
 import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.Eye
 import com.google.vr.sdk.base.GvrView
@@ -18,10 +14,17 @@ import com.google.vr.sdk.base.Viewport
 import me.ctknight.myapplication.drawer.BackgroundRenderer
 import me.ctknight.myapplication.drawer.IDrawer
 import me.ctknight.myapplication.drawer.SimpleDrawer
+import me.ctknight.myapplication.ui.MainActivity
 import me.ctknight.myapplication.utils.ShaderUtil
 import javax.microedition.khronos.egl.EGLConfig
 
-class VRRenderer(private val context: Context, private val scene: Scene) : GvrView.StereoRenderer {
+class VRRenderer(
+    private val context: Context,
+    private val scene: Scene,
+    var frameUpdater: MainActivity,
+    var mARSession: Session? = null,
+    var mAudioEngine: GvrAudioEngine? = null
+) : GvrView.StereoRenderer {
   companion object {
     private val TAG = VRRenderer::class.java.simpleName
     private val Z_NEAR = 0.01f
@@ -29,11 +32,8 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
     private val USE_AR = false
   }
 
-  private val gvrAudioEngine: GvrAudioEngine = GvrAudioEngine(context, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY)
   private lateinit var drawer: IDrawer
   private lateinit var backgroundRenderer: BackgroundRenderer
-
-  private var ARSession: Session? = null
 
   private val mProjectionMatrix = FloatArray(16)
   private val mViewMatrix = FloatArray(16)
@@ -41,61 +41,11 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
   private val mHeadView = FloatArray(16)
   private val mHeadRotation = FloatArray(4)
 
-  private lateinit var bgThread: HandlerThread
-  private lateinit var handler: Handler
-
-  fun onPause() {
-    gvrAudioEngine.pause()
-    ARSession?.pause()
-  }
-
-  fun onResume() {
-    gvrAudioEngine.resume()
-    // checking vr core leaves to MainActivity
-    if (ARSession == null) {
-      val message: String?
-      try {
-        ARSession = Session(context)
-      } catch (e: Exception) {
-        when (e) {
-          is UnavailableArcoreNotInstalledException -> {
-            message = "Please install ARCore"
-          }
-          is UnavailableUserDeclinedInstallationException -> {
-            message = "Please install ARCore"
-          }
-          is UnavailableApkTooOldException -> {
-            message = "Please update ARCore"
-          }
-          is UnavailableSdkTooOldException -> {
-            message = "Please update this app"
-          }
-          is UnavailableDeviceNotCompatibleException -> {
-            message = "This device does not support AR"
-          }
-          else -> {
-            message = "Failed to create AR session"
-          }
-        }
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-        Log.e(TAG, "Exception creating AR session", e)
-      }
-    }
-    try {
-      ARSession?.resume()
-    } catch (e: CameraNotAvailableException) {
-      Toast.makeText(context, "Camera not available", Toast.LENGTH_SHORT).show()
-    }
-  }
-
   override fun onSurfaceCreated(config: EGLConfig) {
     drawer = SimpleDrawer(context)
     drawer.prepareOnGLThread()
     backgroundRenderer = BackgroundRenderer()
     backgroundRenderer.createOnGlThread(context)
-
-    bgThread = HandlerThread("AR update")
-    handler = Handler(bgThread.looper)
   }
 
   override fun onSurfaceChanged(width: Int, height: Int) {
@@ -106,10 +56,10 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
 
     headTransform.getHeadView(mHeadView, 0)
     headTransform.getQuaternion(mHeadRotation, 0)
-    gvrAudioEngine.setHeadRotation(
+    mAudioEngine?.setHeadRotation(
         mHeadRotation[0], mHeadRotation[1], mHeadRotation[2], mHeadRotation[3])
     // Regular update call to GVR audio engine.
-    gvrAudioEngine.update()
+    mAudioEngine?.update()
 
     ShaderUtil.checkGLError(TAG, "onNewFrame")
   }
@@ -118,10 +68,9 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
     if (USE_AR) {
-      ARSession?.setCameraTextureName(backgroundRenderer.textureId)
-      val frame = ARSession?.update()
+      mARSession?.setCameraTextureName(backgroundRenderer.textureId)
+      val frame = frameUpdater.frame
 
-      frame ?: return
       updateMatrixByAR(eye, frame)
 //      backgroundRenderer.draw(frame)
     } else {
@@ -144,12 +93,12 @@ class VRRenderer(private val context: Context, private val scene: Scene) : GvrVi
 
   override fun onRendererShutdown() {
     Log.i(TAG, "onRendererShutdown")
-    bgThread.quitSafely()
   }
 
-  private fun updateMatrixByAR(eye: Eye, frame: Frame) {
+  private val tempViewMatrix = FloatArray(16)
+  private fun updateMatrixByAR(eye: Eye, frame: Frame?) {
+    frame ?: return
     try {
-
       Matrix.setLookAtM(mCameraMatrix, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f)
 //      System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
 //          mProjectionMatrix, 0, mProjectionMatrix.size)
