@@ -5,6 +5,7 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.util.Log
 import com.google.ar.core.Frame
+import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.Eye
@@ -20,7 +21,7 @@ import javax.microedition.khronos.egl.EGLConfig
 
 class VRRenderer(
     private val context: Context,
-    private val scene: Scene,
+    var scene: Scene,
     var frameUpdater: MainActivity,
     var mARSession: Session? = null,
     var mAudioEngine: GvrAudioEngine? = null
@@ -29,7 +30,7 @@ class VRRenderer(
     private val TAG = VRRenderer::class.java.simpleName
     private val Z_NEAR = 0.01f
     private val Z_FAR = 100f
-    private val USE_AR = false
+    private val USE_AR = true
   }
 
   private lateinit var drawer: IDrawer
@@ -69,15 +70,19 @@ class VRRenderer(
 
     if (USE_AR) {
       mARSession?.setCameraTextureName(backgroundRenderer.textureId)
-      val frame = frameUpdater.frame
+      val frame = mARSession?.update()
+      if (frame != null) {
 
-      updateMatrixByAR(eye, frame)
+        val planes = frame.getUpdatedTrackables(Plane::class.java)
+        updateMatrixByAR(eye, frame)
+      }
+
 //      backgroundRenderer.draw(frame)
     } else {
       updateMatrixByVR(eye)
     }
-
-    scene.updateOObjMotion()
+    val scene = this.scene
+    scene.updateObjMotion()
     synchronized(scene) {
       drawer.preDraw()
       for (i in 0..scene.objMap.size()) {
@@ -87,6 +92,8 @@ class VRRenderer(
         }
       }
     }
+
+
   }
 
   override fun onFinishFrame(viewport: Viewport) {}
@@ -95,19 +102,15 @@ class VRRenderer(
     Log.i(TAG, "onRendererShutdown")
   }
 
-  private val tempViewMatrix = FloatArray(16)
-  private fun updateMatrixByAR(eye: Eye, frame: Frame?) {
-    frame ?: return
-    try {
-      Matrix.setLookAtM(mCameraMatrix, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f)
-//      System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
-//          mProjectionMatrix, 0, mProjectionMatrix.size)
-      val camera = frame.camera
-      camera.getProjectionMatrix(mProjectionMatrix, 0, Z_NEAR, Z_FAR)
-      camera.getViewMatrix(mViewMatrix, 0)
-    } catch (e: Throwable) {
-      Log.e(TAG, "exception when uploadMatrix", e)
-    }
+  private val translationMatrix = FloatArray(16)
+  private fun updateMatrixByAR(eye: Eye, frame: Frame) {
+    val pose = frame.androidSensorPose.inverse().extractTranslation()
+    // the phone is rotated by 90 degree and the pose is still in sensor coordinate system
+    Matrix.setIdentityM(translationMatrix, 0)
+    Matrix.translateM(translationMatrix, 0, -pose.ty(), pose.tx(), pose.tz())
+    Matrix.multiplyMM(mViewMatrix, 0, translationMatrix, 0, eye.eyeView, 0)
+    System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
+        mProjectionMatrix, 0, mProjectionMatrix.size)
   }
 
   private fun updateMatrixByVR(eye: Eye) {

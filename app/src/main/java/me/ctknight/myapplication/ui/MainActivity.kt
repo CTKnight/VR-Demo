@@ -6,7 +6,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.widget.Toast
-import com.google.ar.core.Frame
+import com.google.ar.core.Config
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.*
 import com.google.vr.sdk.audio.GvrAudioEngine
@@ -20,7 +20,6 @@ import java.io.IOException
 
 @RuntimePermissions
 class MainActivity : GvrActivity() {
-  private lateinit var mGLView: VRView
   private lateinit var mRenderer: VRRenderer
   private lateinit var mScene: Scene
   private lateinit var mBackgroundThread: HandlerThread
@@ -28,10 +27,6 @@ class MainActivity : GvrActivity() {
   private lateinit var mAudioEngine: GvrAudioEngine
 
   private var mARSession: Session? = null
-  private var sessionResumed = false
-  val frameMonitor = Object()
-  var frame: Frame? = null
-    private set
 
   private var quit = false
 
@@ -44,34 +39,16 @@ class MainActivity : GvrActivity() {
     mBackgroundThread.start()
     mBackgroundHandler = Handler(mBackgroundThread.looper)
 
-    val updateFrameRunnable = object : Runnable {
-      override fun run() {
-        val isQuit = synchronized(this@MainActivity) {
-          quit
-        }
-        if (!isQuit) {
-          frame = synchronized(frameMonitor) {
-            if (sessionResumed) {
-              mARSession?.update()
-            } else {
-              null
-            }
-          }
-          mBackgroundHandler.post(this)
-        }
-      }
-    }
+    mAudioEngine = GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY)
+    mScene = Scene()
     mBackgroundHandler.post {
-      mScene = initScene()
-      mAudioEngine = GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY)
-      mRenderer = VRRenderer(applicationContext, mScene, this, mARSession, mAudioEngine)
-      mGLView.renderer = mRenderer
+      initScene(mScene)
     }
-    mBackgroundHandler.post(updateFrameRunnable)
+    mRenderer = VRRenderer(applicationContext, mScene, this, mARSession, mAudioEngine)
+    gvrView.setRenderer(mRenderer)
   }
 
-  private fun initScene(): Scene {
-    val scene = Scene()
+  private fun initScene(scene: Scene) {
     try {
       //      val obj1 = ObjReader.read(resources.openRawResource(R.raw.cube))
       //      val id1 = mGLView.mScene.addObj(this, obj1, "models/andy.png")
@@ -82,13 +59,16 @@ class MainActivity : GvrActivity() {
         val obj2 = ObjReader.read(resources.assets.open("models/airboat.obj"))
         val id2 = addObj(this@MainActivity, obj2, "models/andy.png")
         val model2 = getObj(id2)
+        if (model2 != null) {
+          model2.translate[2] = -3f
+        }
 
         val obj3 = ObjReader.read(resources.assets.open("models/andy.obj"))
         val id3 = addObj(this@MainActivity, obj3, "models/andy.png")
         val model3 = getObj(id3)
         if (model3 != null) {
-          model3.size = 30f
-          model3.translate[2] = -5f
+          model3.size = 3f
+          model3.translate[2] = -0.5f
         }
         val obj4 = ObjReader.read(resources.assets.open("models/earth.obj"))
         val id4 = addObj(this@MainActivity, obj4, "models/4096_earth.jpg")
@@ -101,10 +81,9 @@ class MainActivity : GvrActivity() {
       }
 
     } catch (e: IOException) {
-      Log.e(TAG, "onCreate: ", e)
+      Log.e(TAG, "initScene: ", e)
       throw RuntimeException(e)
     }
-    return scene
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -117,6 +96,10 @@ class MainActivity : GvrActivity() {
       val message: String?
       try {
         mARSession = Session(this)
+        val config = Config(mARSession)
+        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        mARSession?.configure(config)
+        mRenderer.mARSession = mARSession
       } catch (e: Exception) {
         when (e) {
           is UnavailableArcoreNotInstalledException -> {
@@ -144,7 +127,6 @@ class MainActivity : GvrActivity() {
     }
     try {
       mARSession?.resume()
-      sessionResumed = true
     } catch (e: CameraNotAvailableException) {
       Toast.makeText(this, "Camera not available", Toast.LENGTH_SHORT).show()
     }
@@ -161,7 +143,6 @@ class MainActivity : GvrActivity() {
     super.onPause()
     mAudioEngine.pause()
     mARSession?.pause()
-    sessionResumed = false
   }
 
   override fun onDestroy() {
