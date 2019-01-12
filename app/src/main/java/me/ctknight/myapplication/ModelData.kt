@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.opengl.Matrix
+import de.javagl.obj.Mtl
 import de.javagl.obj.Obj
 import de.javagl.obj.ObjData
 import de.javagl.obj.ObjUtils
@@ -14,8 +15,9 @@ import java.io.IOException
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-class ModelData(private val context: Context, val id: Long, inputObj: Obj, val textureAssetName: String?) {
-  val obj: Obj
+class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val textureAssetName: String?) {
+  var id: Long = -1
+  val obj: Obj = ObjUtils.convertToRenderable(inputObj)
   val numFaceVertices: Int
   private val vertexBuffer: FloatBuffer
   private val faceVertexIndexBuffer: ShortBuffer
@@ -74,8 +76,6 @@ class ModelData(private val context: Context, val id: Long, inputObj: Obj, val t
 
   init {
 
-    obj = ObjUtils.convertToRenderable(inputObj)
-
     vertexBuffer = ObjData.getVertices(obj)
     faceVertexIndexBuffer = ObjData.convertToShortBuffer(ObjData.getFaceVertexIndices(obj))
     normalBuffer = ObjData.getNormals(obj)
@@ -118,32 +118,34 @@ class ModelData(private val context: Context, val id: Long, inputObj: Obj, val t
 
     ShaderUtil.checkGLError("ModelData", "OBJ buffer load")
 
-    if (textureAssetName == null) {
-      return
+    if (textureAssetName != null) {
+      val textures = IntArray(1)
+
+      val textureBitmap: Bitmap
+      try {
+        textureBitmap = BitmapFactory.decodeStream(context.assets.open(textureAssetName))
+      } catch (e: IOException) {
+        throw RuntimeException(e)
+      }
+
+      GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+      GLES20.glGenTextures(textures.size, textures, 0)
+      textureId = textures[0]
+      GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+
+      GLES20.glTexParameteri(
+          GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR)
+      GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+      GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0)
+      GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D)
+      GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+      ShaderUtil.checkGLError("ModelData", "texture load")
+      textureBitmap.recycle()
     }
 
-    val textures = IntArray(1)
+    if (mtl != null) {
 
-    val textureBitmap: Bitmap
-    try {
-      textureBitmap = BitmapFactory.decodeStream(context.assets.open(textureAssetName))
-    } catch (e: IOException) {
-      throw RuntimeException(e)
     }
-
-    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-    GLES20.glGenTextures(textures.size, textures, 0)
-    textureId = textures[0]
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
-
-    GLES20.glTexParameteri(
-        GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR)
-    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, textureBitmap, 0)
-    GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D)
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
-    ShaderUtil.checkGLError("ModelData", "texture load")
-    textureBitmap.recycle()
   }
 
   fun getVertexBuffer(): FloatBuffer {

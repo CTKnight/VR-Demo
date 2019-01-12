@@ -11,7 +11,11 @@ import com.google.ar.core.Session
 import com.google.ar.core.exceptions.*
 import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.GvrActivity
+import de.javagl.obj.MtlReader
 import de.javagl.obj.ObjReader
+import de.javagl.obj.ObjSplitting
+import de.javagl.obj.ObjUtils
+import me.ctknight.myapplication.ModelData
 import me.ctknight.myapplication.R
 import me.ctknight.myapplication.Scene
 import me.ctknight.myapplication.VRRenderer
@@ -48,42 +52,25 @@ class MainActivity : GvrActivity() {
     gvrView.setRenderer(mRenderer)
   }
 
-  private fun initScene(scene: Scene) {
-    try {
-      //      val obj1 = ObjReader.read(resources.openRawResource(R.raw.cube))
-      //      val id1 = mGLView.mScene.addObj(this, obj1, "models/andy.png")
-      //      val model1 = mGLView.mScene.getObj(id1)
-      //      model1.translated[0] = 5f
+  private fun initScene(scene: Scene) = try {
+    //      val obj1 = ObjReader.read(resources.openRawResource(R.raw.cube))
+    //      val id1 = mGLView.mScene.addObj(this, obj1, "models/andy.png")
+    //      val model1 = mGLView.mScene.getObj(id1)
+    //      model1.translated[0] = 5f
 
-      with(scene) {
-        val obj2 = ObjReader.read(resources.assets.open("models/airboat.obj"))
-        val id2 = addObj(this@MainActivity, obj2, "models/andy.png")
-        val model2 = getObj(id2)
-        if (model2 != null) {
-          model2.translate[2] = -3f
-        }
-
-        val obj3 = ObjReader.read(resources.assets.open("models/andy.obj"))
-        val id3 = addObj(this@MainActivity, obj3, "models/andy.png")
-        val model3 = getObj(id3)
-        if (model3 != null) {
-          model3.size = 3f
-          model3.translate[2] = -0.5f
-        }
-        val obj4 = ObjReader.read(resources.assets.open("models/earth.obj"))
-        val id4 = addObj(this@MainActivity, obj4, "models/4096_earth.jpg")
-        val model4 = getObj(id4)
-
-        if (model4 != null) {
-          model4.size = 0.01f
-          model4.translate[1] = 10f
-        }
+    with(scene) {
+      val originalObj = ObjReader.read(resources.assets.open("models/model.obj"))
+      val obj1 = ObjUtils.convertToRenderable(originalObj)
+      val mtl = MtlReader.read(resources.assets.open("models/model.materials.mtl"))
+      val materialGroups = ObjSplitting.splitByMaterialGroups(obj1)
+      materialGroups.forEach { name, obj ->
+        addObj(ModelData(this@MainActivity, obj, mtl.findLast { it.name == name }, null))
       }
-
-    } catch (e: IOException) {
-      Log.e(TAG, "initScene: ", e)
-      throw RuntimeException(e)
     }
+
+  } catch (e: IOException) {
+    Log.e(TAG, "initScene: ", e)
+    throw RuntimeException(e)
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -133,10 +120,14 @@ class MainActivity : GvrActivity() {
     mRenderer.frameUpdater = this
   }
 
+  override fun onStart() {
+    super.onStart()
+    resumeArSessionWithPermissionCheck()
+  }
+
   override fun onResume() {
     super.onResume()
     mAudioEngine.resume()
-    resumeArSessionWithPermissionCheck()
   }
 
   override fun onPause() {

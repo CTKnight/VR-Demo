@@ -1,8 +1,6 @@
 package me.ctknight.myapplication
 
-import android.content.Context
 import android.util.LongSparseArray
-import de.javagl.obj.Obj
 import java.util.concurrent.atomic.AtomicLong
 
 class Scene {
@@ -14,9 +12,10 @@ class Scene {
 
   private var left = false
 
-  fun addObj(context: Context, obj: Obj, mtl: String): Long {
+  fun addObj(modelData: ModelData): Long {
     val id = counter.getAndIncrement()
-    objMap.append(id, ModelData(context, id, obj, mtl))
+    objMap.append(id, modelData)
+    modelData.id = id
     return id
   }
 
