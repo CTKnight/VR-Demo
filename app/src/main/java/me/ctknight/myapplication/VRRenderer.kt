@@ -5,7 +5,6 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.util.Log
 import com.google.ar.core.Frame
-import com.google.ar.core.Plane
 import com.google.ar.core.Session
 import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.Eye
@@ -17,6 +16,7 @@ import me.ctknight.myapplication.drawer.IDrawer
 import me.ctknight.myapplication.drawer.SimpleDrawer
 import me.ctknight.myapplication.ui.MainActivity
 import me.ctknight.myapplication.utils.ShaderUtil
+import me.ctknight.myapplication.utils.toViewPoseTranslation
 import javax.microedition.khronos.egl.EGLConfig
 
 class VRRenderer(
@@ -71,9 +71,8 @@ class VRRenderer(
     if (USE_AR) {
       mARSession?.setCameraTextureName(backgroundRenderer.textureId)
       val frame = mARSession?.update()
-      if (frame != null) {
 
-        val planes = frame.getUpdatedTrackables(Plane::class.java)
+      if (frame != null) {
         updateMatrixByAR(eye, frame)
       }
 
@@ -104,10 +103,12 @@ class VRRenderer(
 
   private val translationMatrix = FloatArray(16)
   private fun updateMatrixByAR(eye: Eye, frame: Frame) {
-    val pose = frame.androidSensorPose.inverse().extractTranslation()
+    val camera = frame.camera
+    val cameraPose = camera.pose.toViewPoseTranslation()
+    val sensorPose = frame.androidSensorPose.toViewPoseTranslation()
+    val pose = cameraPose
     // the phone is rotated by 90 degree and the pose is still in sensor coordinate system
-    Matrix.setIdentityM(translationMatrix, 0)
-    Matrix.translateM(translationMatrix, 0, -pose.ty(), pose.tx(), pose.tz())
+    pose.toMatrix(translationMatrix, 0)
     Matrix.multiplyMM(mViewMatrix, 0, translationMatrix, 0, eye.eyeView, 0)
     System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
         mProjectionMatrix, 0, mProjectionMatrix.size)
