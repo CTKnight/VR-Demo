@@ -23,7 +23,7 @@ void main() {
   vec3 dY = dFdy(vFragPosition);
   vec3 normal = uUseNormal > 0 ? normalize(vNormal) : normalize(cross(dX, dY));
 
-  vec3 lightPos = vec3(uViewMatrix * vec4(uLightPosition, 0.f));
+  vec3 lightPos = vec3(vec4(uLightPosition, 0.f));
   vec3 lightDir = normalize(lightPos - vFragPosition);
   float distance = length(lightPos - vFragPosition);
   float diffuse = max(dot(normal, lightDir), 0.1);

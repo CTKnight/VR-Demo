@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 class Scene {
 
-  val lightPos = floatArrayOf(0f, 3f, -2f)
+  val lightPos = floatArrayOf(0f, 3f, 0f)
   private val counter = AtomicLong(1)
   private val initPosition = FloatArray(3)
   val objMap = LongSparseArray<ModelData>()

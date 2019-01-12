@@ -59,28 +59,36 @@ class MainActivity : GvrActivity() {
         model1.translate[1] = -1.7f
       }
 
-      val modelGroup = buildModelGroup("models/model.obj", "models/model.mtl")
-      modelGroup.forEach {
-        it.translate[0] = -1.3f
-        it.angle[2] = 1f
-        addObj(it)
-      }
-      val treeGroup = buildModelGroup("models/tree.obj", "models/tree.mtl")
-      treeGroup.forEach {
-        it.translate[2] = -0.5f
-        addObj(it)
-      }
-      val tree2Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
-      tree2Group.forEach {
-        it.translate[2] = -0.3f
-        it.translate[0] = -0.5f
-        addObj(it)
-      }
+//      val modelGroup = buildModelGroup("models/model.obj", "models/model.mtl")
+//      modelGroup.forEach {
+//        it.translate[0] = -1.3f
+//        it.angle[2] = 1f
+//        addObj(it)
+//      }
+//      val treeGroup = buildModelGroup("models/tree.obj", "models/tree.mtl")
+//      treeGroup.forEach {
+//        it.translate[2] = -0.5f
+//        addObj(it)
+//      }
+//      val tree2Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
+//      tree2Group.forEach {
+//        it.translate[2] = -0.3f
+//        it.translate[0] = -0.5f
+//        addObj(it)
+//      }
+//
+//      val tree3Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
+//      tree3Group.forEach {
+//        it.translate[2] = -0.3f
+//        it.translate[0] = 0.5f
+//        addObj(it)
+//      }
 
-      val tree3Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
-      tree3Group.forEach {
-        it.translate[2] = -0.3f
-        it.translate[0] = 0.5f
+      val islandGroup = buildModelGroup("models/island.obj", "models/island.mtl")
+      islandGroup.forEach {
+        it.translate[0] = 1f
+        it.translate[1] = -1f
+        it.translate[2] = -2f
         addObj(it)
       }
     }
