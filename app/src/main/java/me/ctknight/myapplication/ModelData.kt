@@ -16,7 +16,7 @@ import java.nio.ShortBuffer
 
 class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val textureAssetName: String?) {
   companion object {
-    private val DEFAULT_COLOR = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+    private val DEFAULT_COLOR = floatArrayOf(1f, 1f, 1f, 1.0f)
   }
 
   var id: Long = -1

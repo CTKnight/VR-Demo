@@ -33,7 +33,7 @@ void main() {
   vec3 lightColor = vec3(1.0, 1.0, 1.0);
   vec4 texureColor = texture2D(uTexture, vec2(vTextureCoord.x, 1.0 - vTextureCoord.y));
   vec3 result1 = diffuse * lightColor * vec3(uColor);
-  vec3 result2 = diffuse * lightColor * texureColor.rgb;
-  vec3 endColor = uUseTexture > 0 ? result1 : result2;
+  vec3 result2 = diffuse * lightColor * vec3(uColor) * texureColor.rgb;
+  vec3 endColor = uUseTexture > 0 ? result2 : result1;
   gl_FragColor = vec4(result1, uColor[3]);
 }

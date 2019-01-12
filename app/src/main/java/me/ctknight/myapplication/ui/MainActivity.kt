@@ -52,27 +52,53 @@ class MainActivity : GvrActivity() {
   private fun initScene(scene: Scene) = try {
 
     with(scene) {
-      val obj1 = ObjReader.read(resources.assets.open("models/andy.obj"))
-      val id1 = addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj1), null, "models/andy.png"))
+      val obj1 = ObjReader.read(resources.assets.open("models/plane.obj"))
+      val id1 = addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj1), null, null))
       val model1 = getObj(id1)
       if (model1 != null) {
-        model1.size = 3f
-        model1.translate[2] = -0.5f
+        model1.translate[1] = -1.7f
       }
-      val originalObj = ObjReader.read(resources.assets.open("models/model.obj"))
-      val obj2 = originalObj
-      val mtl = MtlReader.read(resources.assets.open("models/materials.mtl"))
-      val materialGroups = ObjSplitting.splitByMaterialGroups(obj2)
-      materialGroups
-          .filter { ObjData.getTotalNumFaceVertices(it.value) < 1000 }
-          .forEach { name, obj ->
-            addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj), mtl.findLast { it.name == name }, null))
-          }
+
+      val modelGroup = buildModelGroup("models/model.obj", "models/model.mtl")
+      modelGroup.forEach {
+        it.translate[0] = -1.3f
+        it.angle[2] = 1f
+        addObj(it)
+      }
+      val treeGroup = buildModelGroup("models/tree.obj", "models/tree.mtl")
+      treeGroup.forEach {
+        it.translate[2] = -0.5f
+        addObj(it)
+      }
+      val tree2Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
+      tree2Group.forEach {
+        it.translate[2] = -0.3f
+        it.translate[0] = -0.5f
+        addObj(it)
+      }
+
+      val tree3Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
+      tree3Group.forEach {
+        it.translate[2] = -0.3f
+        it.translate[0] = 0.5f
+        addObj(it)
+      }
     }
     Log.d(TAG, "initScene: all done")
   } catch (e: IOException) {
     Log.e(TAG, "initScene: ", e)
     throw RuntimeException(e)
+  }
+
+  private fun buildModelGroup(objPath: String, mtlPath: String): List<ModelData> {
+    val originalObj = ObjReader.read(resources.assets.open(objPath))
+    val mtl = MtlReader.read(resources.assets.open(mtlPath))
+    val materialGroups = ObjSplitting.splitByMaterialGroups(originalObj)
+    return materialGroups
+        .filter { ObjData.getTotalNumFaceVertices(it.value) < 50000 }
+        .map { (name, obj) ->
+          ModelData(this, ObjUtils.convertToRenderable(obj), mtl.findLast { it.name == name }, null)
+        }
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
