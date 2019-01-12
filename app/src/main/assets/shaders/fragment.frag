@@ -9,6 +9,7 @@ uniform vec4 uColor;
 uniform vec3 uLightPosition;
 uniform int uUseNormal;
 uniform int uHighlight;
+uniform int uUseTexture;
 
 varying vec4 vPosition;
 varying vec3 vNormal;
@@ -33,5 +34,6 @@ void main() {
   vec4 texureColor = texture2D(uTexture, vec2(vTextureCoord.x, 1.0 - vTextureCoord.y));
   vec3 result1 = diffuse * lightColor * vec3(uColor);
   vec3 result2 = diffuse * lightColor * texureColor.rgb;
-  gl_FragColor = vec4(result2, uColor[3]);
+  vec3 endColor = uUseTexture > 0 ? result1 : result2;
+  gl_FragColor = vec4(result1, uColor[3]);
 }

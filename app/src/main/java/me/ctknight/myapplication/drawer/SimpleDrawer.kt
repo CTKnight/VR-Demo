@@ -24,7 +24,8 @@ class SimpleDrawer(
   private var mTextureHandle: Int = 0
   private var mUseNormalHandle: Int = 0
   private var mHighlightHandle: Int = 0
-
+  private var mUseTextureHandle: Int = 0
+  private val modelMatrix = FloatArray(16)
 
   private val vertexStride = COORDS_PER_VERTEX * 4
 
@@ -65,6 +66,7 @@ class SimpleDrawer(
     mTextureHandle = GLES20.glGetUniformLocation(mProgram, "uTexture")
     mUseNormalHandle = GLES20.glGetUniformLocation(mProgram, "uUseNormal")
     mHighlightHandle = GLES20.glGetUniformLocation(mProgram, "uHighlight")
+    mUseTextureHandle = GLES20.glGetUniformLocation(mProgram, "uUseTexture")
     ShaderUtil.checkGLError("SimpleDrawer", "build shader")
   }
 
@@ -77,7 +79,7 @@ class SimpleDrawer(
     ShaderUtil.checkGLError("SimpleDrawer", "before draw")
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-    if (model.textureId >= 0) {
+    if (model.textureId > 0) {
       GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, model.textureId)
       GLES20.glUniform1i(mTextureHandle, 0)
     } else {
@@ -107,12 +109,13 @@ class SimpleDrawer(
     GLES20.glUniform3fv(mLightPositionHandle, 1, scene.lightPos, 0)
 
 
-    val modelMatrix = model.modelMatrix
+    model.getModelMatrix(modelMatrix, 0)
     GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, modelMatrix, 0)
     GLES20.glUniformMatrix4fv(mViewMatrixHandle, 1, false, vMatrix, 0)
     GLES20.glUniformMatrix4fv(mProjectionMatrixHandle, 1, false, pMatrix, 0)
 
     GLES20.glUniform1i(mUseNormalHandle, if (model.normalNum > 0) 1 else -1)
+    GLES20.glUniform1i(mUseTextureHandle, if (model.textureId > 0) 1 else -1)
     GLES20.glUniform1i(mHighlightHandle, if (model.isHighlight) 1 else 0)
 
     GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, model.faceIndexGLId)

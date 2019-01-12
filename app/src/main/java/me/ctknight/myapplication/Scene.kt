@@ -29,6 +29,7 @@ class Scene {
 
   // update object coord
   fun updateObjMotion() {
+    return
     //      getObj(0).getAngle()[2] += 0.1;
     //      getObj(0).getAngle()[2] += 0.1;
     val airboat = getObj(1)

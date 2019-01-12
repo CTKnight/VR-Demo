@@ -11,10 +11,7 @@ import com.google.ar.core.Session
 import com.google.ar.core.exceptions.*
 import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.GvrActivity
-import de.javagl.obj.MtlReader
-import de.javagl.obj.ObjReader
-import de.javagl.obj.ObjSplitting
-import de.javagl.obj.ObjUtils
+import de.javagl.obj.*
 import me.ctknight.myapplication.ModelData
 import me.ctknight.myapplication.R
 import me.ctknight.myapplication.Scene
@@ -53,21 +50,26 @@ class MainActivity : GvrActivity() {
   }
 
   private fun initScene(scene: Scene) = try {
-    //      val obj1 = ObjReader.read(resources.openRawResource(R.raw.cube))
-    //      val id1 = mGLView.mScene.addObj(this, obj1, "models/andy.png")
-    //      val model1 = mGLView.mScene.getObj(id1)
-    //      model1.translated[0] = 5f
 
     with(scene) {
-      val originalObj = ObjReader.read(resources.assets.open("models/model.obj"))
-      val obj1 = ObjUtils.convertToRenderable(originalObj)
-      val mtl = MtlReader.read(resources.assets.open("models/model.materials.mtl"))
-      val materialGroups = ObjSplitting.splitByMaterialGroups(obj1)
-      materialGroups.forEach { name, obj ->
-        addObj(ModelData(this@MainActivity, obj, mtl.findLast { it.name == name }, null))
+      val obj1 = ObjReader.read(resources.assets.open("models/andy.obj"))
+      val id1 = addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj1), null, "models/andy.png"))
+      val model1 = getObj(id1)
+      if (model1 != null) {
+        model1.size = 3f
+        model1.translate[2] = -0.5f
       }
+      val originalObj = ObjReader.read(resources.assets.open("models/model.obj"))
+      val obj2 = originalObj
+      val mtl = MtlReader.read(resources.assets.open("models/materials.mtl"))
+      val materialGroups = ObjSplitting.splitByMaterialGroups(obj2)
+      materialGroups
+          .filter { ObjData.getTotalNumFaceVertices(it.value) < 1000 }
+          .forEach { name, obj ->
+            addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj), mtl.findLast { it.name == name }, null))
+          }
     }
-
+    Log.d(TAG, "initScene: all done")
   } catch (e: IOException) {
     Log.e(TAG, "initScene: ", e)
     throw RuntimeException(e)

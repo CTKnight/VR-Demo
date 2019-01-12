@@ -9,15 +9,18 @@ import android.opengl.Matrix
 import de.javagl.obj.Mtl
 import de.javagl.obj.Obj
 import de.javagl.obj.ObjData
-import de.javagl.obj.ObjUtils
 import me.ctknight.myapplication.utils.ShaderUtil
 import java.io.IOException
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
 class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val textureAssetName: String?) {
+  companion object {
+    private val DEFAULT_COLOR = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
+  }
+
   var id: Long = -1
-  val obj: Obj = ObjUtils.convertToRenderable(inputObj)
+  val obj: Obj = inputObj
   val numFaceVertices: Int
   private val vertexBuffer: FloatBuffer
   private val faceVertexIndexBuffer: ShortBuffer
@@ -27,19 +30,30 @@ class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val 
   var textureId = -1
     private set
   var isHighlight: Boolean = false
-  val color = floatArrayOf(0.3f, 0.3f, 0.3f, 1.0f)
 
-  internal var vertexBufferId: Int = 0
-  internal var indexBufferId: Int = 0
+  val color = FloatArray(4)
+    get() {
+      if (mtl != null) {
+        val kd = mtl.kd
+        field[0] = kd.x
+        field[1] = kd.y
+        field[2] = kd.z
+        field[3] = 1f
+      } else {
+        System.arraycopy(DEFAULT_COLOR, 0, field, 0, 4)
+      }
+      return field
+    }
+
+  private var vertexBufferId: Int = 0
+  private var indexBufferId: Int = 0
   // x, y, z
   // to calculate the model matrix
   val angle = floatArrayOf(0f, 0f, 0f)
   val translate = floatArrayOf(0f, 0f, 0f)
-
   var size = 1f
 
   private var prepared = false
-  private val bufferId = IntArray(2)
 
   private val buffers = IntArray(2)
   var verticesBaseAddress: Int = 0
@@ -58,24 +72,8 @@ class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val 
   // member to avoid duplicated allocation
   private val model = FloatArray(16)
   private val rotate = FloatArray(16)
-  private val translated = FloatArray(16)
-
-  // set the translate part
-  // don't user the Matrix.translateM(), it's factor
-  val modelMatrix: FloatArray
-    get() {
-      val result = FloatArray(16)
-      Matrix.setIdentityM(model, 0)
-      Matrix.scaleM(model, 0, size, size, size)
-      Matrix.setRotateEulerM(rotate, 0, angle[0], angle[1], angle[2])
-      Matrix.multiplyMM(result, 0, model, 0, rotate, 0)
-
-      System.arraycopy(translate, 0, result, 12, 3)
-      return result
-    }
 
   init {
-
     vertexBuffer = ObjData.getVertices(obj)
     faceVertexIndexBuffer = ObjData.convertToShortBuffer(ObjData.getFaceVertexIndices(obj))
     normalBuffer = ObjData.getNormals(obj)
@@ -148,19 +146,13 @@ class ModelData(private val context: Context, inputObj: Obj, val mtl: Mtl?, val 
     }
   }
 
-  fun getVertexBuffer(): FloatBuffer {
-    vertexBuffer.rewind()
-    return vertexBuffer
+  // set the translate part
+  // don't user the Matrix.translateM(), it's factor
+  fun getModelMatrix(matrix: FloatArray, offset: Int) {
+    Matrix.setIdentityM(model, 0)
+    Matrix.scaleM(model, 0, size, size, size)
+    Matrix.setRotateEulerM(rotate, 0, angle[0], angle[1], angle[2])
+    Matrix.multiplyMM(matrix, offset, model, 0, rotate, 0)
+    System.arraycopy(translate, 0, matrix, offset + 12, 3)
   }
-
-  fun getFaceVertexIndexBuffer(): ShortBuffer {
-    faceVertexIndexBuffer.rewind()
-    return faceVertexIndexBuffer
-  }
-
-  fun getNormalBuffer(): FloatBuffer {
-    normalBuffer.rewind()
-    return normalBuffer
-  }
-
 }
