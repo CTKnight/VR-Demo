@@ -1,9 +1,9 @@
-package me.ctknight.myapplication.drawer
+package me.ctknight.vrdemo.drawer
 
 import android.opengl.GLES20
 
-import me.ctknight.myapplication.ModelData
-import me.ctknight.myapplication.Scene
+import me.ctknight.vrdemo.ModelData
+import me.ctknight.vrdemo.Scene
 
 abstract class IDrawer {
   abstract fun prepareOnGLThread()

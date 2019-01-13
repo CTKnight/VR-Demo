@@ -1,4 +1,4 @@
-package me.ctknight.myapplication
+package me.ctknight.vrdemo
 
 import android.content.Context
 import android.opengl.GLES20
@@ -10,12 +10,12 @@ import com.google.vr.sdk.base.Eye
 import com.google.vr.sdk.base.GvrView
 import com.google.vr.sdk.base.HeadTransform
 import com.google.vr.sdk.base.Viewport
-import me.ctknight.myapplication.drawer.BackgroundRenderer
-import me.ctknight.myapplication.drawer.IDrawer
-import me.ctknight.myapplication.drawer.SimpleDrawer
-import me.ctknight.myapplication.ui.MainActivity
-import me.ctknight.myapplication.utils.ShaderUtil
-import me.ctknight.myapplication.utils.toViewPoseTranslation
+import me.ctknight.vrdemo.drawer.BackgroundRenderer
+import me.ctknight.vrdemo.drawer.IDrawer
+import me.ctknight.vrdemo.drawer.SimpleDrawer
+import me.ctknight.vrdemo.ui.MainActivity
+import me.ctknight.vrdemo.utils.ShaderUtil
+import me.ctknight.vrdemo.utils.toViewPoseTranslation
 import javax.microedition.khronos.egl.EGLConfig
 
 class VRRenderer(

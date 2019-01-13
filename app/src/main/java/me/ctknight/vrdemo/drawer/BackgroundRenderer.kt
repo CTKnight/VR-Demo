@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.ctknight.myapplication.drawer
+package me.ctknight.vrdemo.drawer
 
 import android.content.Context
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
-import me.ctknight.myapplication.utils.ShaderUtil
+import me.ctknight.vrdemo.utils.ShaderUtil
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

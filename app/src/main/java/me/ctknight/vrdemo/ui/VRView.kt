@@ -1,9 +1,9 @@
-package me.ctknight.myapplication.ui
+package me.ctknight.vrdemo.ui
 
 import android.content.Context
 import android.util.AttributeSet
 import com.google.vr.sdk.base.GvrView
-import me.ctknight.myapplication.VRRenderer
+import me.ctknight.vrdemo.VRRenderer
 
 class VRView : GvrView {
 

@@ -1,4 +1,4 @@
-package me.ctknight.myapplication
+package me.ctknight.vrdemo
 
 import android.opengl.Matrix
 import android.util.LongSparseArray

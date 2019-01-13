@@ -1,11 +1,11 @@
-package me.ctknight.myapplication.drawer
+package me.ctknight.vrdemo.drawer
 
 import android.content.Context
 import android.opengl.GLES20
 import android.util.Log
-import me.ctknight.myapplication.ModelData
-import me.ctknight.myapplication.Scene
-import me.ctknight.myapplication.utils.ShaderUtil
+import me.ctknight.vrdemo.ModelData
+import me.ctknight.vrdemo.Scene
+import me.ctknight.vrdemo.utils.ShaderUtil
 import java.io.IOException
 
 // must be created in GL render thread

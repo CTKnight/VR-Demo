@@ -1,4 +1,4 @@
-package me.ctknight.myapplication
+package me.ctknight.vrdemo
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -9,7 +9,7 @@ import android.opengl.Matrix
 import de.javagl.obj.Mtl
 import de.javagl.obj.Obj
 import de.javagl.obj.ObjData
-import me.ctknight.myapplication.utils.ShaderUtil
+import me.ctknight.vrdemo.utils.ShaderUtil
 import java.io.IOException
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package me.ctknight.myapplication.utils;
+package me.ctknight.vrdemo.utils;
 
 import android.content.Context;
 import android.opengl.GLES20;

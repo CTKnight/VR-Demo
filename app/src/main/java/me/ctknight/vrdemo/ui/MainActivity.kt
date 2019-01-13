@@ -1,4 +1,4 @@
-package me.ctknight.myapplication.ui
+package me.ctknight.vrdemo.ui
 
 import android.Manifest
 import android.os.Bundle
@@ -12,10 +12,10 @@ import com.google.ar.core.Session
 import com.google.ar.core.exceptions.*
 import com.google.vr.sdk.base.GvrActivity
 import de.javagl.obj.*
-import me.ctknight.myapplication.ModelData
-import me.ctknight.myapplication.R
-import me.ctknight.myapplication.Scene
-import me.ctknight.myapplication.VRRenderer
+import me.ctknight.vrdemo.ModelData
+import me.ctknight.vrdemo.R
+import me.ctknight.vrdemo.Scene
+import me.ctknight.vrdemo.VRRenderer
 import permissions.dispatcher.*
 import java.io.IOException
 
