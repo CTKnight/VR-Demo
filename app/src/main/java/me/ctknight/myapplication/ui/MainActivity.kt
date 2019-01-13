@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.*
-import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.GvrActivity
 import de.javagl.obj.*
 import me.ctknight.myapplication.ModelData
@@ -25,11 +24,8 @@ class MainActivity : GvrActivity() {
   private lateinit var mScene: Scene
   private lateinit var mBackgroundThread: HandlerThread
   private lateinit var mBackgroundHandler: Handler
-  private lateinit var mAudioEngine: GvrAudioEngine
 
   private var mARSession: Session? = null
-
-  private var quit = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -40,12 +36,11 @@ class MainActivity : GvrActivity() {
     mBackgroundThread.start()
     mBackgroundHandler = Handler(mBackgroundThread.looper)
 
-    mAudioEngine = GvrAudioEngine(this, GvrAudioEngine.RenderingMode.BINAURAL_HIGH_QUALITY)
     mScene = Scene()
     mBackgroundHandler.post {
       initScene(mScene)
     }
-    mRenderer = VRRenderer(applicationContext, mScene, this, mARSession, mAudioEngine)
+    mRenderer = VRRenderer(applicationContext, mScene, this, mARSession)
     gvrView.setRenderer(mRenderer)
   }
 
@@ -56,39 +51,12 @@ class MainActivity : GvrActivity() {
       val id1 = addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj1), null, null))
       val model1 = getObj(id1)
       if (model1 != null) {
-        model1.translate[1] = -1.7f
       }
-
-//      val modelGroup = buildModelGroup("models/model.obj", "models/model.mtl")
-//      modelGroup.forEach {
-//        it.translate[0] = -1.3f
-//        it.angle[2] = 1f
-//        addObj(it)
-//      }
-//      val treeGroup = buildModelGroup("models/tree.obj", "models/tree.mtl")
-//      treeGroup.forEach {
-//        it.translate[2] = -0.5f
-//        addObj(it)
-//      }
-//      val tree2Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
-//      tree2Group.forEach {
-//        it.translate[2] = -0.3f
-//        it.translate[0] = -0.5f
-//        addObj(it)
-//      }
-//
-//      val tree3Group = buildModelGroup("models/tree.obj", "models/tree.mtl")
-//      tree3Group.forEach {
-//        it.translate[2] = -0.3f
-//        it.translate[0] = 0.5f
-//        addObj(it)
-//      }
 
       val islandGroup = buildModelGroup("models/island.obj", "models/island.mtl")
       islandGroup.forEach {
-        it.translate[0] = 1f
-        it.translate[1] = -1f
-        it.translate[2] = -2f
+        //        it.translate[0] = 1f
+        it.translate[1] = 1f
         addObj(it)
       }
     }
@@ -161,23 +129,14 @@ class MainActivity : GvrActivity() {
     resumeArSessionWithPermissionCheck()
   }
 
-  override fun onResume() {
-    super.onResume()
-    mAudioEngine.resume()
-  }
-
   override fun onPause() {
     super.onPause()
-    mAudioEngine.pause()
     mARSession?.pause()
   }
 
   override fun onDestroy() {
     super.onDestroy()
     mBackgroundThread.quitSafely()
-    synchronized(this) {
-      quit = true
-    }
   }
 
   @OnShowRationale(Manifest.permission.CAMERA)

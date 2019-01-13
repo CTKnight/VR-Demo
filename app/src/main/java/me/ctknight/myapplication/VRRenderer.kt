@@ -6,7 +6,6 @@ import android.opengl.Matrix
 import android.util.Log
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
-import com.google.vr.sdk.audio.GvrAudioEngine
 import com.google.vr.sdk.base.Eye
 import com.google.vr.sdk.base.GvrView
 import com.google.vr.sdk.base.HeadTransform
@@ -23,8 +22,7 @@ class VRRenderer(
     private val context: Context,
     var scene: Scene,
     var frameUpdater: MainActivity,
-    var mARSession: Session? = null,
-    var mAudioEngine: GvrAudioEngine? = null
+    var mARSession: Session? = null
 ) : GvrView.StereoRenderer {
   companion object {
     private val TAG = VRRenderer::class.java.simpleName
@@ -39,8 +37,6 @@ class VRRenderer(
   private val mProjectionMatrix = FloatArray(16)
   private val mViewMatrix = FloatArray(16)
   private val mCameraMatrix = FloatArray(16)
-  private val mHeadView = FloatArray(16)
-  private val mHeadRotation = FloatArray(4)
 
   override fun onSurfaceCreated(config: EGLConfig) {
     drawer = SimpleDrawer(context)
@@ -54,14 +50,6 @@ class VRRenderer(
   }
 
   override fun onNewFrame(headTransform: HeadTransform) {
-
-    headTransform.getHeadView(mHeadView, 0)
-    headTransform.getQuaternion(mHeadRotation, 0)
-    mAudioEngine?.setHeadRotation(
-        mHeadRotation[0], mHeadRotation[1], mHeadRotation[2], mHeadRotation[3])
-    // Regular update call to GVR audio engine.
-    mAudioEngine?.update()
-
     ShaderUtil.checkGLError(TAG, "onNewFrame")
   }
 
@@ -102,6 +90,7 @@ class VRRenderer(
   }
 
   private val translationMatrix = FloatArray(16)
+  private val sceneMatrix = FloatArray(16)
   private fun updateMatrixByAR(eye: Eye, frame: Frame) {
     val camera = frame.camera
     val cameraPose = camera.pose.toViewPoseTranslation()
@@ -109,7 +98,8 @@ class VRRenderer(
     val pose = cameraPose
     // the phone is rotated by 90 degree and the pose is still in sensor coordinate system
     pose.toMatrix(translationMatrix, 0)
-    Matrix.multiplyMM(mViewMatrix, 0, translationMatrix, 0, eye.eyeView, 0)
+    Matrix.multiplyMM(sceneMatrix, 0, eye.eyeView, 0, scene.viewPositionMatrix, 0)
+    Matrix.multiplyMM(mViewMatrix, 0, translationMatrix, 0, sceneMatrix, 0)
     System.arraycopy(eye.getPerspective(0.01f, 50f), 0,
         mProjectionMatrix, 0, mProjectionMatrix.size)
   }
