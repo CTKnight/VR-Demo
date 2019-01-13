@@ -2,6 +2,12 @@
 
 A demo to demonstrate how to build a VR app in cardboard using [google-vr](https://github.com/googlevr/gvr-android-sdk) and [ARCore](https://github.com/google-ar/arcore-android-sdk)
 
+![preview1](./img/Screenshot_20190113-132336.jpg)
+
+![preview2](./img/Screenshot_20190113-132351.jpg)
+
+![preview3](./img/Screenshot_20190113-134121.jpg)
+
 ## How to use
 
 1. Build it in Android Studio or download it from release
