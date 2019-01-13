@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Toast
 import com.google.ar.core.Config
 import com.google.ar.core.Session
@@ -137,6 +138,19 @@ class MainActivity : GvrActivity() {
   override fun onDestroy() {
     super.onDestroy()
     mBackgroundThread.quitSafely()
+  }
+
+  override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    when (keyCode) {
+      KeyEvent.KEYCODE_VOLUME_UP -> {
+        mScene.viewPosition[1] += 0.2f
+      }
+      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+        mScene.viewPosition[1] -= 0.2f
+      }
+      else -> super.onKeyDown(keyCode, event)
+    }
+    return true
   }
 
   @OnShowRationale(Manifest.permission.CAMERA)
