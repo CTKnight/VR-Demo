@@ -18,7 +18,9 @@ A demo to demonstrate how to build a VR app in cardboard using [google-vr](https
 
 ## License
 
-The [MediaLab Island](https://poly.google.com/view/8pbArn70zK3) model credit to [Wesley Oliveira](https://poly.google.com/user/c36U2gan4pw).
+The [MediaLab Island](https://poly.google.com/view/8pbArn70zK3) and [Cube Room](https://poly.google.com/view/1fahMeqZOw_) models credit to [Wesley Oliveira](https://poly.google.com/user/c36U2gan4pw) and [Anonymous](https://poly.google.com/user/f8cGQY15_-g), respectively.
+
+
 
 ```
 Copyright 2019 Jiewen Lai

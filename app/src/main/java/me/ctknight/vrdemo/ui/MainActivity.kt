@@ -64,8 +64,9 @@ class MainActivity : GvrActivity() {
   private fun initScene(scene: Scene) = try {
 
     with(scene) {
-      val obj1 = ObjReader.read(resources.assets.open("models/plane.obj"))
-      val id1 = addObj(ModelData(this@MainActivity, ObjUtils.convertToRenderable(obj1), null, null))
+      val obj1 = ObjReader.read(resources.assets.open("models/CubeRoom.obj"))
+      val id1 = addObj(ModelData(this@MainActivity,
+          ObjUtils.convertToRenderable(obj1), null, "models/CubeRoom_BakedDiffuse_4096.png"))
       val model1 = getObj(id1)
       if (model1 != null) {
       }
